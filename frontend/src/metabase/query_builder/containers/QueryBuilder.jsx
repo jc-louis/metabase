@@ -5,6 +5,8 @@ import { push } from "react-router-redux";
 import { t } from "ttag";
 import _ from "underscore";
 
+import Questions from "metabase/entities/questions";
+
 import Collections from "metabase/entities/collections";
 import { MetabaseApi } from "metabase/services";
 import { getMetadata } from "metabase/selectors/metadata";
@@ -139,12 +141,15 @@ const mapStateToProps = (state, props) => {
     nativeEditorSelectedText: getNativeEditorSelectedText(state),
     modalSnippet: getModalSnippet(state),
     snippetCollectionId: getSnippetCollectionId(state),
+    isBookmarked: false,
   };
 };
 
 const mapDispatchToProps = {
   ...actions,
   onChangeLocation: push,
+  setBookmarked: (id, shouldBeBookmarked) =>
+    Questions.objectActions.setFavorited(id, shouldBeBookmarked),
 };
 
 @connect(mapStateToProps, mapDispatchToProps)
@@ -223,6 +228,16 @@ export default class QueryBuilder extends Component {
     }, 5000);
   };
 
+  toggleBookmark = () => {
+    const {
+      card: { id },
+      isBookmarked,
+      setBookmarked,
+    } = this.props;
+
+    setBookmarked(id, !isBookmarked);
+  };
+
   handleCreate = async card => {
     const { question, apiCreateQuestion } = this.props;
     const questionWithUpdatedCard = question.setCard(card);
@@ -262,6 +277,7 @@ export default class QueryBuilder extends Component {
         onSave={this.handleSave}
         onCreate={this.handleCreate}
         handleResize={this.handleResize}
+        toggleBookmark={this.toggleBookmark}
       />
     );
   }
