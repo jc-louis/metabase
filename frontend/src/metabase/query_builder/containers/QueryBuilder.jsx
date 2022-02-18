@@ -10,6 +10,8 @@ import { MetabaseApi } from "metabase/services";
 import { getMetadata } from "metabase/selectors/metadata";
 import { getUser, getUserIsAdmin } from "metabase/selectors/user";
 
+import { useQuestionTimelineEvents } from "metabase/containers/QuestionTimelineEventsLoader";
+
 import { useForceUpdate } from "metabase/hooks/use-force-update";
 import { useOnMount } from "metabase/hooks/use-on-mount";
 import { useOnUnmount } from "metabase/hooks/use-on-unmount";
@@ -61,6 +63,7 @@ import {
   getIsLiveResizable,
   getNativeEditorCursorOffset,
   getNativeEditorSelectedText,
+  getHiddenTimelineSet,
 } from "../selectors";
 import * as actions from "../actions";
 
@@ -144,6 +147,8 @@ const mapStateToProps = (state, props) => {
     nativeEditorSelectedText: getNativeEditorSelectedText(state),
     modalSnippet: getModalSnippet(state),
     snippetCollectionId: getSnippetCollectionId(state),
+
+    hiddenTimelineSet: getHiddenTimelineSet(state),
   };
 };
 
@@ -178,6 +183,8 @@ function QueryBuilder(props) {
 
   const previousUIControls = usePrevious(uiControls);
   const previousLocation = usePrevious(location);
+
+  const timelineEvents = useQuestionTimelineEvents({ question });
 
   const openModal = useCallback(modal => setUIControls({ modal }), [
     setUIControls,
@@ -277,6 +284,7 @@ function QueryBuilder(props) {
   return (
     <View
       {...props}
+      timelineEvents={timelineEvents}
       modal={uiControls.modal}
       recentlySaved={uiControls.recentlySaved}
       onOpenModal={openModal}

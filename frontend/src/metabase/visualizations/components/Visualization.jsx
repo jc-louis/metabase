@@ -81,7 +81,9 @@ export default class Visualization extends React.PureComponent {
   UNSAFE_componentWillReceiveProps(newProps) {
     if (
       !isSameSeries(newProps.rawSeries, this.props.rawSeries) ||
-      !Utils.equals(newProps.settings, this.props.settings)
+      !Utils.equals(newProps.settings, this.props.settings) ||
+      newProps.timelineEvents !== this.props.timelineEvents ||
+      newProps.hiddenTimelineSet !== this.props.hiddenTimelineSet
     ) {
       this.transform(newProps);
     }
@@ -141,6 +143,10 @@ export default class Visualization extends React.PureComponent {
     const computedSettings = series
       ? getComputedSettingsForSeries(series)
       : null;
+    console.log("### VIZ TRANSFORM", {
+      timelineEvents: newProps.timelineEvents,
+      hiddenTimelineSet: newProps.hiddenTimelineSet,
+    });
     this.setState({
       hovered: null,
       clicked: null,
@@ -150,6 +156,9 @@ export default class Visualization extends React.PureComponent {
       series: series,
       visualization: visualization,
       computedSettings: computedSettings,
+      timelineEvents: newProps.timelineEvents.filter(
+        timeline => !newProps.hiddenTimelineSet.includes(timeline.id),
+      ),
     });
   }
 
@@ -512,6 +521,7 @@ export default class Visualization extends React.PureComponent {
         ) : (
           <CardVisualization
             {...this.props}
+            timelineEvents={this.state.timelineEvents}
             // NOTE: CardVisualization class used to target ExplicitSize HOC
             className="CardVisualization flex-full flex-basis-none"
             series={series}
